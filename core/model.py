@@ -1,8 +1,21 @@
 import tensorflow as tf
+import numpy as np
 
+def initialize_weights(shape, name=None):
+    """
+        The paper, http://www.cs.utoronto.ca/~gkoch/files/msc-thesis.pdf
+        suggests to initialize CNN layer weights with mean as 0.0 and standard deviation of 0.01
+    """
+    return np.random.normal(loc = 0.0, scale = 1e-2, size = shape)
 
+def initialize_bias(shape, name=None):
+    """
+        The paper, http://www.cs.utoronto.ca/~gkoch/files/msc-thesis.pdf
+        suggests to initialize CNN layer bias with mean as 0.5 and standard deviation of 0.01
+    """
+    return np.random.normal(loc = 0.5, scale = 1e-2, size = shape)
 
-def build_model(input_shape = (952, 1360)):
+def get_model(input_shape = (952, 1360)):
     """
         Model architecture
     """
@@ -13,15 +26,15 @@ def build_model(input_shape = (952, 1360)):
 
     # Convolutional Neural Network
     model = tf.layers.Sequential([
-        tf.keras.layers.Conv2D(64, (10, 10), activation = 'relu', input_shape = input_shape, kernel_initializer = 'random_uniform', kernel_regularizer = tf.keras.regularizers.l2(2e-4)),
+        tf.keras.layers.Conv2D(64, (10, 10), activation = 'relu', input_shape = input_shape, kernel_initializer = initialize_weights(), kernel_regularizer = tf.keras.regularizers.l2(2e-4)),
         tf.keras.layers.MaxPool2D(),
-        tf.keras.layers.Conv2D(128, (7, 7), activation='relu', kernel_initializer = 'random_uniform', bias_initializer = 'zeros', kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
+        tf.keras.layers.Conv2D(128, (7, 7), activation='relu', kernel_initializer = initialize_weights(), bias_initializer = initialize_bias(), kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
         tf.keras.layers.MaxPool2D(),
-        tf.keras.layers.Conv2D(128, (4, 4), activation='relu', kernel_initializer='random_uniform', bias_initializer='zeros', kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
+        tf.keras.layers.Conv2D(128, (4, 4), activation='relu', kernel_initializer= initialize_weights(), bias_initializer=initialize_bias(), kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
         tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(256, (4, 4), activation='relu', kernel_initializer='random_uniform', bias_initializer='zeros', kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
+        tf.keras.layers.Conv2D(256, (4, 4), activation='relu', kernel_initializer=initialize_weights(), bias_initializer=initialize_bias(), kernel_regularizer=tf.keras.regularizers.l2(2e-4)),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(4096, activation='sigmoid',kernel_regularizer=l2(1e-3), kernel_initializer='random_uniform', bias_initializer='zeros')
+        tf.keras.layers.Dense(4096, activation='sigmoid',kernel_regularizer=l2(1e-3), kernel_initializer=initialize_weights(), bias_initializer=initialize_bias())
 
     ])
 
@@ -45,4 +58,5 @@ def build_model(input_shape = (952, 1360)):
     return siamese_net
 
 if __name__ == '__main__':
-    build_model()
+    model = get_model((105, 105, 1))
+    model.summary()
